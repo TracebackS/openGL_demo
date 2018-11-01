@@ -58,11 +58,11 @@ void loadShader(const char *shader)
 		shaders[FRAG] = glCreateShader(GL_FRAGMENT_SHADER);
 		type = FRAG;
 	}
-	else if (!strncmp(shader_type, "comp", 4))
-	{
-		shaders[COMP] = glCreateShader(GL_COMPUTE_SHADER);
-		type = COMP;
-	}
+//	else if (!strncmp(shader_type, "comp", 4))
+//	{
+//		shaders[COMP] = glCreateShader(GL_COMPUTE_SHADER);
+//		type = COMP;
+//	}
 	else
 	{
 		free(src);
