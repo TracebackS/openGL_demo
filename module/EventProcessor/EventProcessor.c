@@ -1,8 +1,13 @@
 #include "EventProcessor.h"
 
-static char key_pressed_bitmap[32];
+#include <math.h>
 
-void processEvent()
+#define PI 3.14159265358979323846264338327950288419716939937510582097
+
+static char key_pressed_bitmap[32];
+static float move_unit = 0.05;
+
+void processEvent(SDL_Window *window)
 {
 	SDL_Event e;
 	while (SDL_PollEvent(&e))
@@ -11,6 +16,9 @@ void processEvent()
 		{
 			case SDL_QUIT:
 			{
+				SDL_DestroyWindow(window);
+				SDL_Quit();
+				exit(0);
 				break;
 			}
 			case SDL_APP_TERMINATING:
@@ -32,6 +40,7 @@ void processEvent()
 			case SDL_TEXTINPUT:
 			case SDL_KEYMAPCHANGED:
 			{
+				processKeyboardEvent(e);
 				break;
 			}
 			case SDL_MOUSEMOTION:
@@ -39,6 +48,7 @@ void processEvent()
 			case SDL_MOUSEBUTTONUP:
 			case SDL_MOUSEWHEEL:
 			{
+				processMouseEvent(e);
 				break;
 			}
 			case SDL_JOYAXISMOTION:
@@ -104,14 +114,90 @@ void processEvent()
 			}
 		}
 	}
+
+	if (ifKeyPressed(SDL_SCANCODE_LSHIFT))
+	{
+		move_unit = 0.0005;
+	}
+	else
+	{
+		move_unit = 0.05;
+	}
+	if (ifKeyPressed(SDL_SCANCODE_W))
+	{
+		eye_x += move_unit * cos(forward_h);
+		eye_z += move_unit * sin(forward_h);
+	}
+	if (ifKeyPressed(SDL_SCANCODE_S))
+	{
+		eye_x -= move_unit * cos(forward_h);
+		eye_z -= move_unit * sin(forward_h);
+	}
+	if (ifKeyPressed(SDL_SCANCODE_A))
+	{
+		eye_x += move_unit * sin(forward_h);
+		eye_z -= move_unit * cos(forward_h);
+	}
+	if (ifKeyPressed(SDL_SCANCODE_D))
+	{
+		eye_x -= move_unit * sin(forward_h);
+		eye_z += move_unit * cos(forward_h);
+	}
+	if (ifKeyPressed(SDL_SCANCODE_ESCAPE))
+	{
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		exit(0);
+	}
 }
 
 static void processKeyboardEvent(SDL_Event e)
 {
+	switch (e.type)
+	{
+		case SDL_KEYDOWN:
+		{
+			pressKey(e.key.keysym.scancode);
+			break;
+		}
+		case SDL_KEYUP:
+		{
+			releaseKey(e.key.keysym.scancode);
+			break;
+		}
+		case SDL_TEXTEDITING:
+		case SDL_TEXTINPUT:
+		case SDL_KEYMAPCHANGED:
+		default:
+		{
+			break;
+		}
+	}
 }
 
 static void processMouseEvent(SDL_Event e)
 {
+	switch (e.type)
+	{
+		case SDL_MOUSEMOTION:
+		{
+			forward_v = fminf(forward_v - e.motion.yrel * 0.01f, PI / 2 - 0.000000001f);
+			forward_v = fmaxf(forward_v, -PI / 2 + 0.000000001f);
+			forward_h = fmodf(forward_h + e.motion.xrel * 0.01f, 2 * PI);
+			break;
+		}
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP:
+		case SDL_MOUSEWHEEL:
+		{
+			eye_y += e.wheel.y * move_unit;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
 }
 
 static void pressKey(SDL_Scancode key)

@@ -7,6 +7,7 @@ add_subdirectory (${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory (${PROJECT_SOURCE_DIR}/module)
 
 set (EXTRA_LIBS ${EXTRA_LIBS} ShaderLoader
+							  EventProcessor
                               glad
 							  SDL2
                               dl
